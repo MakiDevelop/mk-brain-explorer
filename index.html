@@ -80,6 +80,9 @@ const empty = document.getElementById('empty');
 const countEl = document.getElementById('count');
 let activeRoute = 'all';
 
+const esc = s => String(s ?? '').replace(/[&<>"'\/]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;'}[c]));
+function safeUrl(u) { try { const p = new URL(u); return ['http:','https:'].includes(p.protocol) ? p.href : '#'; } catch { return '#'; } }
+
 function signalClass(s) {
   if (s >= 80) return 'signal-top';
   if (s >= 60) return 'signal-high';
@@ -92,16 +95,17 @@ function formatDate(d) {
 }
 
 function renderCard(b) {
-  const title = b.title || b.url.split('/').pop() || b.url;
+  const title = esc(b.title || b.url.split('/').pop() || b.url);
+  const href = safeUrl(b.url);
   return `<div class="card">
     <div class="card-header">
-      <span class="card-domain">${b.domain || ''}</span>
+      <span class="card-domain">${esc(b.domain)}</span>
       <span class="signal-badge ${signalClass(b.signal)}">⚡ ${b.signal}</span>
     </div>
-    <div class="card-title"><a href="${b.url}" target="_blank" rel="noopener">${title}</a></div>
-    <div class="card-insight">${b.insight || ''}</div>
+    <div class="card-title"><a href="${href}" target="_blank" rel="noopener">${title}</a></div>
+    <div class="card-insight">${esc(b.insight)}</div>
     <div class="card-footer">
-      <span class="route-tag">${b.route || '—'}</span>
+      <span class="route-tag">${esc(b.route || '—')}</span>
       <span class="card-date">${formatDate(b.date)}</span>
     </div>
   </div>`;
